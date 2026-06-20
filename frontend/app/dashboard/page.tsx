@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface UserInfo {
   userId: string;
@@ -78,8 +79,7 @@ export default function DashboardPage() {
             <p className="text-gray-400 text-sm">
               You are logged in as <span className="text-white font-medium">{user.email}</span> with{" "}
               <span className="text-blue-400 font-medium">{user.roles.join(", ")}</span> role(s).
-              This dashboard will expand in the next phases with policy management,
-              access testing, and audit log views.
+              {user.roles.includes("ADMIN") ? " Manage resources, policies, and test access below." : " Contact an admin for access policy changes."}
             </p>
           </div>
 
@@ -114,18 +114,26 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Phase 2+ placeholders */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-gray-900/50 border border-gray-800 border-dashed rounded-xl p-6 text-center">
+        {/* Navigation cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Link href="/dashboard/resources"
+            className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center hover:border-blue-500/40 hover:bg-gray-900/80 transition group">
+            <div className="text-3xl mb-2">📦</div>
+            <h3 className="text-sm font-medium text-white group-hover:text-blue-400 transition">Resources</h3>
+            <p className="text-xs text-gray-500 mt-1">Manage governed data assets</p>
+          </Link>
+          <Link href="/dashboard/policies"
+            className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center hover:border-purple-500/40 hover:bg-gray-900/80 transition group">
             <div className="text-3xl mb-2">🔐</div>
-            <h3 className="text-sm font-medium text-gray-300">Policy Management</h3>
-            <p className="text-xs text-gray-500 mt-1">Coming in Phase 2</p>
-          </div>
-          <div className="bg-gray-900/50 border border-gray-800 border-dashed rounded-xl p-6 text-center">
+            <h3 className="text-sm font-medium text-white group-hover:text-purple-400 transition">Policies</h3>
+            <p className="text-xs text-gray-500 mt-1">Define access control rules</p>
+          </Link>
+          <Link href="/dashboard/access"
+            className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center hover:border-green-500/40 hover:bg-gray-900/80 transition group">
             <div className="text-3xl mb-2">🧪</div>
-            <h3 className="text-sm font-medium text-gray-300">Access Testing</h3>
-            <p className="text-xs text-gray-500 mt-1">Coming in Phase 2</p>
-          </div>
+            <h3 className="text-sm font-medium text-white group-hover:text-green-400 transition">Try Access</h3>
+            <p className="text-xs text-gray-500 mt-1">Test policy decisions</p>
+          </Link>
           <div className="bg-gray-900/50 border border-gray-800 border-dashed rounded-xl p-6 text-center">
             <div className="text-3xl mb-2">📋</div>
             <h3 className="text-sm font-medium text-gray-300">Audit Log</h3>
