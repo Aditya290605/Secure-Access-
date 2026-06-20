@@ -134,11 +134,12 @@ export default function DashboardPage() {
             <h3 className="text-sm font-medium text-white group-hover:text-green-400 transition">Try Access</h3>
             <p className="text-xs text-gray-500 mt-1">Test policy decisions</p>
           </Link>
-          <div className="bg-gray-900/50 border border-gray-800 border-dashed rounded-xl p-6 text-center">
+          <Link href="/dashboard/audit"
+            className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center hover:border-amber-500/40 hover:bg-gray-900/80 transition group">
             <div className="text-3xl mb-2">📋</div>
-            <h3 className="text-sm font-medium text-gray-300">Audit Log</h3>
-            <p className="text-xs text-gray-500 mt-1">Coming in Phase 3</p>
-          </div>
+            <h3 className="text-sm font-medium text-white group-hover:text-amber-400 transition">Audit Log</h3>
+            <p className="text-xs text-gray-500 mt-1">View access trail</p>
+          </Link>
         </div>
       </main>
     </div>

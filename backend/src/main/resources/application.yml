@@ -31,6 +31,16 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
+# Actuator — health, info, metrics
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
 ---
 spring:
   config:
