@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
 import { Resource, AccessDecision, UserInfo } from "@/lib/types";
+import { 
+  Shield, Zap, ArrowLeft, User, Database, CheckCircle, 
+  XCircle, Clock, AlertTriangle, Play, Info
+} from "lucide-react";
 
 const ACTIONS = ["READ", "WRITE"];
 
@@ -70,44 +74,73 @@ export default function TryAccessPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950">
-      <header className="border-b border-gray-800 bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-4">
-          <Link href="/dashboard" className="text-gray-400 hover:text-white transition">← Dashboard</Link>
-          <h1 className="text-xl font-bold text-white">Try Access</h1>
+    <div className="min-h-screen bg-white text-slate-900">
+      {/* Header */}
+      <header className="bg-white border-b border-slate-100 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/dashboard" className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-blue-600 transition">
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Dashboard
+            </Link>
+            <span className="text-slate-300 text-sm">/</span>
+            <span className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+              <Zap className="w-4 h-4 text-blue-600" />
+              Interactive Policy Tester
+            </span>
+          </div>
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Main container */}
+      <main className="max-w-3xl mx-auto px-6 lg:px-8 py-10">
         {error && (
-          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">{error}</div>
+          <div className="mb-6 flex items-start gap-2 p-4 bg-rose-50 border border-rose-100 rounded-2xl">
+            <AlertTriangle className="w-4 h-4 text-rose-600 mt-0.5 shrink-0" />
+            <p className="text-xs font-bold text-rose-700">{error}</p>
+          </div>
         )}
 
         {loading ? (
-          <div className="text-center py-12 text-gray-400">Loading...</div>
+          <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-2 bg-white border border-slate-100 rounded-2xl shadow-sm shadow-blue-500/5">
+            <span className="w-6 h-6 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+            <span className="text-xs font-bold">Loading tester components...</span>
+          </div>
         ) : (
-          <>
+          <div className="space-y-6 animate-fade-in">
             {/* Access Check Form */}
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-6">
-              <h2 className="text-lg font-semibold text-white mb-4">Check Access</h2>
-              <p className="text-sm text-gray-400 mb-6">
-                Select a user, resource, and action to test whether the policy engine allows or denies the request.
+            <div className="bg-white border border-slate-100 shadow-md shadow-blue-500/5 rounded-2xl p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                  <Zap className="w-4.5 h-4.5 text-blue-600" />
+                </div>
+                <h2 className="text-sm font-bold text-slate-950">Check Subject Permission</h2>
+              </div>
+              <p className="text-xs text-slate-500 mb-6 leading-relaxed font-semibold">
+                Select a user account, target resource, and proposed action. SecureAccess will execute policy matching and output a compliance-ready explanation trace.
               </p>
 
               {(resources.length === 0 || users.length === 0) && (
-                <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-yellow-400 text-sm">
-                  {resources.length === 0 && "No resources exist. "}
-                  {users.length === 0 && "No users exist. "}
-                  Create them first before testing access.
+                <div className="mb-6 flex items-start gap-2.5 p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs font-bold text-amber-700">
+                  <AlertTriangle className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    {resources.length === 0 && "No data resources registered. "}
+                    {users.length === 0 && "No registered user accounts found. "}
+                    You must register them in the dashboard before you can evaluate access.
+                  </div>
                 </div>
               )}
 
               <form onSubmit={handleCheck} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">User</label>
-                    <select value={selectedUserId} onChange={(e) => setSelectedUserId(e.target.value)}
-                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">User Context</label>
+                    <select 
+                      value={selectedUserId} 
+                      onChange={(e) => setSelectedUserId(e.target.value)}
+                      disabled={users.length === 0}
+                      className="w-full px-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition disabled:opacity-50"
+                    >
                       {users.map((u) => (
                         <option key={u.id} value={u.id}>
                           {u.email} [{u.roles.join(", ")}]
@@ -115,82 +148,125 @@ export default function TryAccessPage() {
                       ))}
                     </select>
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">Resource</label>
-                    <select value={selectedResourceId} onChange={(e) => setSelectedResourceId(e.target.value)}
-                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Resource Asset</label>
+                    <select 
+                      value={selectedResourceId} 
+                      onChange={(e) => setSelectedResourceId(e.target.value)}
+                      disabled={resources.length === 0}
+                      className="w-full px-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition disabled:opacity-50"
+                    >
                       {resources.map((r) => (
                         <option key={r.id} value={r.id}>{r.name}</option>
                       ))}
                     </select>
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">Action</label>
-                    <select value={selectedAction} onChange={(e) => setSelectedAction(e.target.value)}
-                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Proposed Action</label>
+                    <select 
+                      value={selectedAction} 
+                      onChange={(e) => setSelectedAction(e.target.value)}
+                      className="w-full px-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+                    >
                       {ACTIONS.map((a) => <option key={a} value={a}>{a}</option>)}
                     </select>
                   </div>
                 </div>
-                <button type="submit"
-                  disabled={checking || resources.length === 0 || users.length === 0}
-                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white font-medium rounded-lg transition">
-                  {checking ? "Evaluating..." : "🔍 Check Access"}
-                </button>
+
+                <div className="pt-2">
+                  <button 
+                    type="submit"
+                    disabled={checking || resources.length === 0 || users.length === 0}
+                    className="inline-flex items-center gap-1.5 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white text-xs font-bold rounded-xl transition shadow-md shadow-blue-500/10 hover:shadow-lg"
+                  >
+                    {checking ? (
+                      <>
+                        <span className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                        Evaluating...
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-3.5 h-3.5" />
+                        Execute Policy Check
+                      </>
+                    )}
+                  </button>
+                </div>
               </form>
             </div>
 
-            {/* Decision Result */}
+            {/* Decision Result Card */}
             {decision && (
-              <div className={`border rounded-xl p-6 ${
+              <div className={`border rounded-2xl p-6 shadow-md shadow-blue-500/5 animate-fade-in-up ${
                 decision.allowed
-                  ? "bg-green-500/5 border-green-500/30"
-                  : "bg-red-500/5 border-red-500/30"
+                  ? "bg-emerald-50/30 border-emerald-200 text-slate-900"
+                  : "bg-rose-50/30 border-rose-200 text-slate-900"
               }`}>
-                <div className="flex items-center gap-3 mb-4">
-                  <span className={`text-3xl`}>
-                    {decision.allowed ? "✅" : "🚫"}
-                  </span>
+                <div className="flex items-start gap-4 mb-5">
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${
+                    decision.allowed
+                      ? "bg-emerald-100 border-emerald-200 text-emerald-700"
+                      : "bg-rose-100 border-rose-200 text-rose-700"
+                  }`}>
+                    {decision.allowed ? (
+                      <CheckCircle className="w-5 h-5" />
+                    ) : (
+                      <XCircle className="w-5 h-5" />
+                    )}
+                  </div>
                   <div>
-                    <h3 className={`text-xl font-bold ${
-                      decision.allowed ? "text-green-400" : "text-red-400"
+                    <h3 className={`text-base font-extrabold tracking-tight uppercase ${
+                      decision.allowed ? "text-emerald-800" : "text-rose-800"
                     }`}>
-                      {decision.decision}
+                      Access {decision.allowed ? "ALLOWED" : "DENIED"}
                     </h3>
-                    <p className="text-sm text-gray-400">
-                      {decision.userEmail} → {decision.action} → {decision.resourceName}
+                    <p className="text-xs text-slate-500 mt-0.5 font-semibold">
+                      Subject: <span className="font-bold text-slate-700">{decision.userEmail}</span> 
+                      &nbsp;• Resource: <span className="font-bold text-slate-700">{decision.resourceName}</span>
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-gray-900/60 rounded-lg p-4">
-                  <h4 className="text-xs font-medium text-gray-400 uppercase mb-2">Reason</h4>
-                  <p className={`text-sm ${decision.allowed ? "text-green-300" : "text-red-300"}`}>
+                {/* Explanation logic block - replaced grey background with high contrast white/blue panel */}
+                <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-sm">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    <Info className="w-3.5 h-3.5 text-slate-400" />
+                    Trace Explanation
+                  </div>
+                  <p className={`text-xs leading-relaxed font-bold ${decision.allowed ? "text-emerald-700" : "text-rose-700"}`}>
                     {decision.reason}
                   </p>
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs text-gray-400">
+                {/* Evaluated Metadata Attributes */}
+                <div className="mt-5 pt-5 border-t border-slate-200/60 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-semibold">
                   <div>
-                    <span className="block text-gray-500">User</span>
-                    <span className="text-white">{decision.userEmail}</span>
+                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">User Account</span>
+                    <span className="text-slate-800 block truncate">{decision.userEmail}</span>
                   </div>
                   <div>
-                    <span className="block text-gray-500">Resource</span>
-                    <span className="text-white">{decision.resourceName}</span>
+                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Target Resource</span>
+                    <span className="text-slate-800 block truncate">{decision.resourceName}</span>
                   </div>
                   <div>
-                    <span className="block text-gray-500">Action</span>
-                    <span className="text-white">{decision.action}</span>
+                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Evaluated Action</span>
+                    <span className="text-slate-800 block">{decision.action}</span>
                   </div>
                   <div>
-                    <span className="block text-gray-500">Evaluated At</span>
-                    <span className="text-white">{new Date(decision.evaluatedAt).toLocaleTimeString()}</span>
+                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-slate-400" />
+                      Evaluated At
+                    </span>
+                    <span className="text-slate-800 block">
+                      {new Date(decision.evaluatedAt).toLocaleTimeString()}
+                    </span>
                   </div>
                 </div>
               </div>
             )}
-          </>
+          </div>
         )}
       </main>
     </div>
