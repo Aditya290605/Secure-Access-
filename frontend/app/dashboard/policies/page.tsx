@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
 import { Policy, Resource } from "@/lib/types";
+import { 
+  Lock, Plus, Trash2, ArrowLeft, Shield, 
+  User, CheckCircle, FileText, AlertTriangle, Eye
+} from "lucide-react";
 
 const ROLES = ["ADMIN", "EDITOR", "VIEWER"];
 const PERMISSIONS = ["READ", "WRITE", "DENY"];
@@ -76,7 +80,7 @@ export default function PoliciesPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this policy?")) return;
+    if (!confirm("Are you sure you want to delete this access policy?")) return;
     try {
       await apiFetch(`/api/admin/policies/${id}`, { method: "DELETE" });
       await loadData();
@@ -85,125 +89,240 @@ export default function PoliciesPage() {
     }
   }
 
-  const permissionColor: Record<string, string> = {
-    READ: "text-green-400 bg-green-500/10 border-green-500/20",
-    WRITE: "text-blue-400 bg-blue-500/10 border-blue-500/20",
-    DENY: "text-red-400 bg-red-500/10 border-red-500/20",
+  const permissionBadge = (perm: string) => {
+    switch (perm) {
+      case "READ":
+        return (
+          <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+            <CheckCircle className="w-3 h-3" />
+            READ
+          </span>
+        );
+      case "WRITE":
+        return (
+          <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100">
+            <Plus className="w-3 h-3" />
+            WRITE
+          </span>
+        );
+      case "DENY":
+        return (
+          <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-100">
+            <AlertTriangle className="w-3 h-3" />
+            DENY
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-bold bg-slate-50 text-slate-700 border border-slate-100">
+            {perm}
+          </span>
+        );
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-950">
-      <header className="border-b border-gray-800 bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-gray-400 hover:text-white transition">← Dashboard</Link>
-            <h1 className="text-xl font-bold text-white">Policies</h1>
+    <div className="min-h-screen bg-white text-slate-900">
+      {/* Header */}
+      <header className="bg-white border-b border-slate-100 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/dashboard" className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-blue-600 transition">
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Dashboard
+            </Link>
+            <span className="text-slate-300 text-sm">/</span>
+            <span className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+              <Lock className="w-4 h-4 text-blue-600" />
+              Access Policies
+            </span>
           </div>
           <button
-            onClick={() => setShowForm(!showForm)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition"
+            onClick={() => {
+              setShowForm(!showForm);
+              setFormError("");
+            }}
+            className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition shadow-md shadow-blue-500/10 hover:shadow-lg"
           >
-            {showForm ? "Cancel" : "+ New Policy"}
+            {showForm ? "Cancel" : (
+              <>
+                <Plus className="w-3.5 h-3.5" />
+                Configure Policy
+              </>
+            )}
           </button>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Main content */}
+      <main className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
         {error && (
-          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">{error}</div>
+          <div className="mb-6 flex items-start gap-2 p-4 bg-rose-50 border border-rose-100 rounded-2xl">
+            <AlertTriangle className="w-4 h-4 text-rose-600 mt-0.5 shrink-0" />
+            <p className="text-xs font-bold text-rose-700">{error}</p>
+          </div>
         )}
 
+        {/* Create Policy card */}
         {showForm && (
-          <div className="mb-6 bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h2 className="text-lg font-semibold text-white mb-4">Create Policy</h2>
+          <div className="mb-8 bg-white border border-slate-100 shadow-md shadow-blue-500/5 rounded-2xl p-6 animate-fade-in-up">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                <Lock className="w-4.5 h-4.5 text-blue-600" />
+              </div>
+              <h2 className="text-sm font-bold text-slate-950">Define Access Control Policy</h2>
+            </div>
+
             {resources.length === 0 && (
-              <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-yellow-400 text-sm">
-                No resources exist yet. <Link href="/dashboard/resources" className="underline">Create a resource first</Link>.
+              <div className="mb-4 flex items-start gap-2.5 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+                <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+                <p className="text-xs font-semibold text-amber-700">
+                  No data assets exist in the system yet. You must{" "}
+                  <Link href="/dashboard/resources" className="underline font-bold hover:text-amber-800">
+                    register a resource first
+                  </Link>{" "}
+                  before configuring its policies.
+                </p>
               </div>
             )}
+
             {formError && (
-              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">{formError}</div>
+              <div className="mb-4 flex items-start gap-2 p-3.5 bg-rose-50 border border-rose-100 rounded-xl">
+                <AlertTriangle className="w-4 h-4 text-rose-600 mt-0.5 shrink-0" />
+                <p className="text-xs font-bold text-rose-700">{formError}</p>
+              </div>
             )}
+
             <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Role</label>
-                <select value={role} onChange={(e) => setRole(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Administrative Role</label>
+                <select 
+                  value={role} 
+                  onChange={(e) => setRole(e.target.value)}
+                  className="w-full px-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+                >
                   {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
                 </select>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Resource</label>
-                <select value={resourceId} onChange={(e) => setResourceId(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Target Data Resource</label>
+                <select 
+                  value={resourceId} 
+                  onChange={(e) => setResourceId(e.target.value)}
+                  disabled={resources.length === 0}
+                  className="w-full px-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition disabled:opacity-50"
+                >
                   {resources.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
                 </select>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Permission</label>
-                <select value={permission} onChange={(e) => setPermission(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Access Permission</label>
+                <select 
+                  value={permission} 
+                  onChange={(e) => setPermission(e.target.value)}
+                  className="w-full px-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+                >
                   {PERMISSIONS.map((p) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Condition (optional)</label>
-                <input value={conditionExpression} onChange={(e) => setConditionExpression(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g. owner_only, business_hours" />
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Evaluation Condition (optional)</label>
+                <input 
+                  value={conditionExpression} 
+                  onChange={(e) => setConditionExpression(e.target.value)}
+                  className="w-full px-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+                  placeholder="e.g. owner_only, business_hours" 
+                />
               </div>
-              <div className="md:col-span-2">
-                <button type="submit" disabled={submitting || resources.length === 0}
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white text-sm font-medium rounded-lg transition">
-                  {submitting ? "Creating..." : "Create Policy"}
+
+              <div className="md:col-span-2 pt-2">
+                <button 
+                  type="submit" 
+                  disabled={submitting || resources.length === 0}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white text-xs font-bold rounded-xl transition shadow-md shadow-blue-500/10 hover:shadow-lg"
+                >
+                  {submitting ? "Saving Policy..." : "Create Policy"}
                 </button>
               </div>
             </form>
           </div>
         )}
 
+        {/* Policies list container */}
         {loading ? (
-          <div className="text-center py-12 text-gray-400">Loading policies...</div>
+          <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-2 bg-white border border-slate-100 rounded-2xl shadow-sm shadow-blue-500/5">
+            <span className="w-6 h-6 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+            <span className="text-xs font-bold">Loading access rules...</span>
+          </div>
         ) : policies.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-3xl mb-2">🔐</div>
-            <p className="text-gray-400">No policies yet. Create one to define access rules.</p>
+          <div className="bg-white border border-slate-100 rounded-2xl p-12 text-center shadow-sm shadow-blue-500/5 animate-fade-in">
+            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-100/50">
+              <Lock className="w-6 h-6 text-blue-600" />
+            </div>
+            <h3 className="text-sm font-bold text-slate-900 mb-1">No Access Policies Configured</h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto mb-5 leading-normal font-semibold">Configure permission rules mapping roles to resources. The engine enforces these rules with deny-wins semantics.</p>
+            <button
+              onClick={() => setShowForm(true)}
+              className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition shadow-md shadow-blue-500/10 hover:shadow-lg"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Configure First Policy
+            </button>
           </div>
         ) : (
-          <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-800">
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Role</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Resource</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Permission</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Condition</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-800">
-                {policies.map((p) => (
-                  <tr key={p.id} className="hover:bg-gray-800/50 transition">
-                    <td className="px-4 py-3">
-                      <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-purple-500/10 text-purple-400">
-                        {p.role}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-white">{p.resourceName}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 text-xs font-medium rounded-full border ${permissionColor[p.permission] || ""}`}>
-                        {p.permission}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-400">{p.conditionExpression || "—"}</td>
-                    <td className="px-4 py-3 text-right">
-                      <button onClick={() => handleDelete(p.id)}
-                        className="text-red-400 hover:text-red-300 text-sm transition">Delete</button>
-                    </td>
+          <div className="bg-white border border-slate-100 rounded-2xl shadow-md shadow-blue-500/5 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50/20">
+                    <th className="px-6 py-4.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Role Identity</th>
+                    <th className="px-6 py-4.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Target Resource</th>
+                    <th className="px-6 py-4.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Permitted Action</th>
+                    <th className="px-6 py-4.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Condition Clause</th>
+                    <th className="px-6 py-4.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">Operations</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {policies.map((p) => (
+                    <tr key={p.id} className="hover:bg-slate-50/30 transition">
+                      <td className="px-6 py-4.5">
+                        <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-bold bg-violet-50 text-violet-700 border border-violet-100">
+                          <User className="w-3 h-3 text-violet-600" />
+                          {p.role}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4.5">
+                        <span className="text-xs font-bold text-slate-900">{p.resourceName}</span>
+                      </td>
+                      <td className="px-6 py-4.5">
+                        {permissionBadge(p.permission)}
+                      </td>
+                      <td className="px-6 py-4.5">
+                        {p.conditionExpression ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-mono bg-slate-100/80 text-slate-700 border border-slate-200">
+                            {p.conditionExpression}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-slate-400 font-semibold italic">No condition</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4.5 text-right">
+                        <button 
+                          onClick={() => handleDelete(p.id)}
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 transition px-3 py-2 rounded-xl hover:bg-rose-50"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </main>
